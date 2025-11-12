@@ -2,6 +2,11 @@
 
 @custom-variant dark (&:is(.dark *));
 
+*{
+
+  scroll-behavior: smooth;
+}
+
 @theme {
   --font-*: initial;
   --font-outfit: Outfit, sans-serif;
@@ -37,6 +42,7 @@
   --color-transparent: transparent;
   --color-white: #ffffff;
   --color-black: #101828;
+  --color-whiteBg:#f8f8ff;
 
   --color-brand-25: #f2f7ff;
   --color-brand-50: #ecf3ff;
@@ -737,4 +743,47 @@ span.flatpickr-weekday,
     0 1px 2px 0 rgba(16, 24, 40, 0.06);
   opacity: 0.8;
   cursor: grabbing; /* Changes the cursor to indicate dragging */
+}
+
+
+@theme inline {
+  @keyframes grid {
+  0% {
+    transform: translateY(-50%);
+    }
+  100% {
+    transform: translateY(0);
+    }
+  }
+  @keyframes grid {
+  0% {
+    transform: translateY(-50%);
+    }
+  100% {
+    transform: translateY(0);
+    }
+  }
+
+  
+  @keyframes ripple {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    }
+  50% {
+    transform: translate(-50%, -50%) scale(0.9);
+    }
+  }
+}
+
+@keyframes grid {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 0 var(--cell-size);
+  }
+}
+
+.animate-grid {
+  animation: grid 25s linear infinite;
 }

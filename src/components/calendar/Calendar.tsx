@@ -39,7 +39,6 @@ const Calendar: React.FC = () => {
   };
 
   useEffect(() => {
-    // Initialize with some events
     setEvents([
       {
         id: "1",
