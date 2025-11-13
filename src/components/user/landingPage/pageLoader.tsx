@@ -69,7 +69,7 @@ export const PageLoader: React.FC<PageLoaderProps> = ({
             className="mb-8"
           >
             <motion.h1
-              className={`${rubikClassName} text-6xl md:text-8xl lg:text-9xl font-bold text-white tracking-tight`}
+              className={`${rubikClassName} text-6xl md:text-8xl lg:text-9xl font-black text-white tracking-tight`}
               animate={{
                 scale: [1, 1.02, 1],
               }}

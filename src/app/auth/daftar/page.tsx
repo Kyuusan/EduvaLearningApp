@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Users, ArrowLeft, CircleChevronLeft, Eye, EyeOff } from 'lucide-react';
+import { Users,  CircleChevronLeft } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
@@ -10,8 +10,7 @@ import { useRouter } from 'next/navigation';
 export default function Register() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
 
   return (
     <div>
@@ -140,7 +139,6 @@ export default function Register() {
                       />
                     </motion.div>
 
-                    {/* City */}
                     <motion.div
                       initial={{ x: -20, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
@@ -152,6 +150,19 @@ export default function Register() {
                         className="w-full rounded-lg border border-blue-200 bg-white px-5 py-3 text-sm font-medium placeholder-gray-500 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100"
                         type="text"
                         placeholder="Kelas"
+                      />
+                    </motion.div>
+                    <motion.div
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ duration: 0.5, delay: 1.6 }}
+                    >
+                      <motion.input
+                        whileFocus={{ scale: 1.02, borderColor: "#60a5fa" }}
+                        transition={{ duration: 0.2 }}
+                        className="w-full rounded-lg border border-blue-200 bg-white px-5 py-3 text-sm font-medium placeholder-gray-500 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100"
+                        type="text"
+                        placeholder="Email"
                       />
                     </motion.div>
 
@@ -166,48 +177,13 @@ export default function Register() {
                         whileFocus={{ scale: 1.02, borderColor: "#60a5fa" }}
                         transition={{ duration: 0.2 }}
                         className="w-full rounded-lg border border-blue-200 bg-white px-5 py-3 text-sm font-medium placeholder-gray-500 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100 pr-12"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Kata Sandi"
+                        type='text'
+                        value={"Kata sandi bawaan : SMK1234"}
+                        readOnly
                       />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-800 transition-colors"
-                      >
-                        {showPassword ? (
-                          <EyeOff size={20} />
-                        ) : (
-                          <Eye size={20} />
-                        )}
-                      </button>
                     </motion.div>
 
-                    {/* Confirm Password */}
-                    <motion.div
-                      initial={{ x: -20, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ duration: 0.5, delay: 1.8 }}
-                      className="relative"
-                    >
-                      <motion.input
-                        whileFocus={{ scale: 1.02, borderColor: "#60a5fa" }}
-                        transition={{ duration: 0.2 }}
-                        className="w-full rounded-lg border border-blue-200 bg-white px-5 py-3 text-sm font-medium placeholder-gray-500 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100 pr-12"
-                        type={showConfirmPassword ? "text" : "password"}
-                        placeholder="Konfirmasi Kata Sandi"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-800 transition-colors"
-                      >
-                        {showConfirmPassword ? (
-                          <EyeOff size={20} />
-                        ) : (
-                          <Eye size={20} />
-                        )}
-                      </button>
-                    </motion.div>
+                   
                   </div>
 
                   <motion.div 
@@ -272,13 +248,13 @@ export default function Register() {
                   transition={{ duration: 0.5, delay: 2.1 }}
                   className="mt-4 text-center text-xs text-gray-600"
                 >
-                  Dengan mendaftar, Anda menyetujui{' '}
+                  Akun anda akan di proses admin untuk persetujuan pembuatan akun {''}
                   <motion.a
                     whileHover={{ scale: 1.02 }}
                     href="#"
                     className="border-b border-dotted border-blue-600 text-blue-800 transition-colors duration-200 hover:text-blue-900"
                   >
-                    Syarat & Ketentuan
+                  hal ini bagian dari Syarat & Ketentuan
                   </motion.a>{' '}
                   dan{' '}
                   <motion.a

@@ -94,7 +94,7 @@ export default function Kyuusan() {
               </motion.div>
             </motion.div>
 
-            <h1 className="px-4 text-center text-3xl leading-tight font-medium md:text-4xl lg:text-5xl 2xl:text-7xl">
+            <h1 className="px-4 text-center text-3xl leading-tight font-semibold md:text-4xl lg:text-5xl 2xl:text-7xl">
               Portal Belajar   <br />
               <span className="text-blue-900">SMK Nanuna Jaya Depok</span>
             </h1>
@@ -141,7 +141,7 @@ export default function Kyuusan() {
           </h1>
 
           {/* Description */}
-          <p className="text-base lg:text-lg 2xl:text-xl text-center lg:text-left text-gray-700 leading-relaxed">
+          <p className={`text-base lg:text-lg 2xl:text-xl text-center lg:text-left text-gray-700 leading-relaxed ${poppins.className}`}>
               Eduva adalah sebuah platform media pembelajaran digital SMK Nanuna Jaya yang di tujukan untuk mengajarkan generasi penerus bangsa 
               untuk mengikuti dan adaptasi terhadap perkembangan zaman, Eduva juga membuat kegiatan belajar lebih efektif di bandingkan dengan cara belajar
               sebelumnya sehingga memudahkan siswa agar tidak diwajibkan membawa buku dari rumah
