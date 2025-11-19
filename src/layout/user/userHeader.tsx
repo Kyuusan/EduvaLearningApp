@@ -85,17 +85,17 @@ const UserHeader: React.FC = () => {
 
           <Link href="/" className="lg:hidden">
             <Image
-              width={154}
+              width={124}
               height={32}
               className="dark:hidden"
-              src="./images/logo/logo.svg"
+              src="./images/logo/eduvaLightLogo.png"
               alt="Logo"
             />
             <Image
-              width={154}
+              width={124}
               height={32}
               className="hidden dark:block"
-              src="./images/logo/logo-dark.svg"
+              src="./images/logo/eduvaDarkLogo.png"
               alt="Logo"
             />
           </Link>
@@ -130,7 +130,7 @@ const UserHeader: React.FC = () => {
         >
           <div className="flex items-center gap-2 2xsm:gap-3">
             {/* <!-- Dark Mode Toggler --> */}
-            <ThemeToggleButton />
+            {/* <ThemeToggleButton /> */}
             {/* <!-- Dark Mode Toggler --> */}
 
            <NotificationDropdown /> 

@@ -4,7 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../../context/SidebarContext";
-import {House, CalendarFold, Blocks, Bot, CircleUserRound, ChevronDownIcon} from "lucide-react"
+import {House, CalendarFold, Blocks, Bot, CircleUserRound, ChevronDownIcon, SquareKanban} from "lucide-react"
+import { HorizontaLDots } from "@/icons";
 
 type NavItem = {
   name: string;
@@ -33,6 +34,11 @@ const navItems: NavItem[] = [
     icon: <Bot />,
     name: "Chatbot",
     path: "/admin/chatbot"
+  },
+  {
+    icon: <SquareKanban />,
+    name: "Managemen Pengguna",
+    path: "/admin/manage"
   },
   {
     icon: <CircleUserRound />,
@@ -292,22 +298,22 @@ const AppSidebar: React.FC = () => {
             <>
               <Image
                 className="dark:hidden"
-                src="/images/logo/logo.svg"
+                src="/images/logo/eduvaLightLogo.png"
                 alt="Logo"
-                width={150}
+                width={120}
                 height={40}
               />
               <Image
                 className="hidden dark:block"
-                src="/images/logo/logo-dark.svg"
+                src="/images/logo/eduvaDarkLogo.png"
                 alt="Logo"
-                width={150}
+                width={120}
                 height={40}
               />
             </>
           ) : (
             <Image
-              src="/images/logo/logo-icon.svg"
+              src="/images/logo/eduvaLogo.png"
               alt="Logo"
               width={32}
               height={32}

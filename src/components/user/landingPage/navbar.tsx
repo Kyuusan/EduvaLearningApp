@@ -237,12 +237,12 @@ export const NavbarLogo = () => {
       className="relative z-20 mr-4 flex items-center space-x-2 px-2 py-1 text-sm font-medium text-black"
     >
       <img
-        src="https://tse3.mm.bing.net/th/id/OIP.vz1OnfJX3xPAu6tmcYX4SAAAAA?pid=Api&P=0&h=180"
+        src="/images/logo/eduvaLightLogo.png"
         alt="logo"
-        width={30}
+        width={80}
         height={30}
       />
-      <span className="font-black text-blue-500">EDUVA</span>
+  
     </a>
   );
 };

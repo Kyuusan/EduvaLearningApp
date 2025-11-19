@@ -28,7 +28,7 @@ const poppins = Poppins({
 const rubik = Rubik({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-rubik",
+  variable: "--font-rubik"
 });
 
 export default function Kyuusan() {
@@ -65,34 +65,40 @@ export default function Kyuusan() {
           <div
             className={`flex min-h-[calc(100vh-200px)] w-full flex-col items-center justify-center gap-4 py-8 md:py-12 3xl:gap-8 ${rubik.className}`}
           >
-            <motion.div
-              className="flex h-[60px] w-[60px] cursor-pointer items-center justify-center rounded-xl bg-white shadow-[inset_-4px_0_8px_rgba(0,0,0,0.25)] md:h-[100px] md:w-[100px] md:rounded-lg"
-              whileHover={{
-                scale: 1.1,
-                rotate: [0, -5, 5, -5, 0],
-                transition: {
-                  rotate: {
-                    duration: 0.5,
-                    repeat: Infinity,
-                    repeatType: "reverse",
-                  },
-                  scale: { duration: 0.2 },
-                  boxShadow: { duration: 0.3 },
-                },
-              }}
-              whileTap={{ scale: 0.95 }}
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <motion.div
-                className="relative h-[40px] w-[40px] md:h-[60px] md:w-[60px]"
-                whileHover={{ rotate: 360 }}
-                transition={{ duration: 0.6 }}
-              >
+<motion.div
+  className="flex h-[60px] w-[60px] md:h-[100px] md:w-[100px] cursor-pointer items-center justify-center rounded-xl bg-white shadow-[inset_-4px_0_8px_rgba(0,0,0,0.25)]"
+  whileHover={{
+    scale: 1.1,
+    rotate: [0, -5, 5, -5, 0],
+    transition: {
+      rotate: {
+        duration: 0.5,
+        repeat: Infinity,
+        repeatType: "reverse",
+      },
+      scale: { duration: 0.2 },
+      boxShadow: { duration: 0.3 },
+    },
+  }}
+  whileTap={{ scale: 0.95 }}
+  initial={{ opacity: 0, y: -20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.5 }}
+>
+  <motion.div
+    className="relative flex items-center justify-center h-[40px] w-[40px] md:h-[60px] md:w-[60px]"
+    whileHover={{ rotate: 360 }}
+    transition={{ duration: 0.6 }}
+  >
+    <Image
+      src="/images/logo/eduvaLogo.png"
+      alt="Eduva Logo"
+      fill
+      className="object-contain"
+    />
+  </motion.div>
+</motion.div>
 
-              </motion.div>
-            </motion.div>
 
             <h1 className="px-4 text-center text-3xl leading-tight font-semibold md:text-4xl lg:text-5xl 2xl:text-7xl">
               Portal Belajar   <br />

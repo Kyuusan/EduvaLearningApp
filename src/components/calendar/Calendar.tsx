@@ -120,16 +120,17 @@ const Calendar: React.FC = () => {
   };
 
   return (
-    <div className="rounded-2xl border  border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+    <div className="overflow-x-scroll overflow-y-hidden rounded-2xl border  border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
       <div className="custom-calendar">
         <FullCalendar
           ref={calendarRef}
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
           headerToolbar={{
-            left: "prev,next addEventButton",
+            left: "addEventButton",
             center: "title",
-            right: "dayGridMonth,timeGridWeek,timeGridDay",
+            right: "prev,next"
+         
           }}
           events={events}
           selectable={true}
