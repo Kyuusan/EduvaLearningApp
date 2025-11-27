@@ -10,6 +10,7 @@ import {
   DragControls,
 } from "framer-motion";
 import { GripVertical } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export interface DragItem {
   id: number;
@@ -17,6 +18,7 @@ export interface DragItem {
   desc: string;
   deadline: string;
   link?: string;
+  courseId?: number; // Added for navigation
 }
 
 interface DragOrderListProps {
@@ -26,6 +28,10 @@ interface DragOrderListProps {
 
 export function ListTugas({ items, onReorder }: DragOrderListProps) {
   const [list, setList] = React.useState(items);
+
+  useEffect(() => {
+    setList(items);
+  }, [items]);
 
   useEffect(() => {
     if (onReorder) onReorder(list);
@@ -46,9 +52,33 @@ export function ListTugas({ items, onReorder }: DragOrderListProps) {
 }
 
 function DragOrderItem({ item }: { item: DragItem }) {
+  const router = useRouter();
   const y = useMotionValue(0);
   const boxShadow = useRaisedShadow(y);
   const dragControls = useDragControls();
+  const [isDragging, setIsDragging] = React.useState(false);
+
+  const handleClick = (e: React.MouseEvent) => {
+    // Don't navigate if user is dragging
+    if (isDragging) {
+      return;
+    }
+
+    // Prevent navigation when clicking drag handle
+    const target = e.target as HTMLElement;
+    if (target.closest('[data-drag-handle]')) {
+      return;
+    }
+    
+    // Navigate to course detail page
+    if (item.courseId) {
+      console.log('Navigating to:', `/siswa/course/${item.courseId}`);
+      router.push(`/user/course/${item.courseId}`);
+    } else if (item.link) {
+      console.log('Navigating to:', item.link);
+      router.push(item.link);
+    }
+  };
 
   return (
     <Reorder.Item
@@ -56,14 +86,21 @@ function DragOrderItem({ item }: { item: DragItem }) {
       style={{ boxShadow, y }}
       dragListener={false}
       dragControls={dragControls}
+      onDragStart={() => setIsDragging(true)}
+      onDragEnd={() => {
+        // Reset dragging state after a small delay to prevent click event
+        setTimeout(() => setIsDragging(false), 100);
+      }}
       className="flex justify-between items-start p-4 
         bg-white dark:bg-gray-800/50
         border border-gray-200 dark:border-gray-700
         rounded-xl 
         hover:border-gray-300 dark:hover:border-gray-600
-        transition-colors duration-200"
+        transition-colors duration-200
+        cursor-pointer"
+      onClick={handleClick}
     >
-      <div className="flex flex-col space-y-1.5 flex-1 pr-3">
+      <div className="flex flex-col space-y-1.5 flex-1 pr-3 pointer-events-none">
         <h2 className="text-base font-semibold text-gray-800 dark:text-white/90 line-clamp-1">
           {item.tittle}
         </h2>
@@ -73,16 +110,9 @@ function DragOrderItem({ item }: { item: DragItem }) {
         <span className="text-xs text-gray-500 dark:text-gray-500">
           {item.deadline}
         </span>
-        {item.link && (
-          <a
-            href={item.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-1 inline-block text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline"
-          >
-            Lihat Detail →
-          </a>
-        )}
+        <span className="mt-1 inline-block text-xs text-blue-600 dark:text-blue-400">
+          Klik untuk lihat detail →
+        </span>
       </div>
       <ReorderHandle dragControls={dragControls} />
     </Reorder.Item>
@@ -92,17 +122,23 @@ function DragOrderItem({ item }: { item: DragItem }) {
 function ReorderHandle({ dragControls }: { dragControls: DragControls }) {
   return (
     <motion.div
+      data-drag-handle
       whileTap={{ scale: 0.95 }}
       onPointerDown={(e) => {
         e.preventDefault();
+        e.stopPropagation();
         dragControls.start(e);
+      }}
+      onClick={(e) => {
+        // Prevent click event from bubbling to parent
+        e.stopPropagation();
       }}
       className="cursor-grab active:cursor-grabbing p-2 
         text-gray-400 dark:text-gray-500 
         hover:text-gray-600 dark:hover:text-gray-400
         hover:bg-gray-100 dark:hover:bg-gray-700/50
         rounded-lg transition-colors duration-150
-        flex-shrink-0"
+        flex-shrink-0 pointer-events-auto"
     >
       <GripVertical className="w-5 h-5" />
     </motion.div>

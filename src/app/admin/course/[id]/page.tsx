@@ -19,6 +19,7 @@ import {
   deleteTask,
   getTaskFileUrl 
 } from '../../../../../lib/task.action';
+import { useRouter } from "next/navigation";
 import { AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 
@@ -35,21 +36,16 @@ interface Task {
   createdAt: string;
 }
 
-interface CourseHeaderCompactProps {
-  courseDetail: {
-    namaCourse: string;
-    enrolledClasses: string[];
-  } | null;
-}
 
 export default function AdminCourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   // ✅ Unwrap params Promise
   const unwrappedParams = use(params);
+  const router = useRouter()
   
   const courseId = parseInt(unwrappedParams.id);
   
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [courseDetail, setCourseDetail] = useState<any>(null);
+  const [courseDetail, setCourseDetail] = useState< any>(null);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -524,11 +520,17 @@ export default function AdminCourseDetailPage({ params }: { params: Promise<{ id
           {/* Navigation Tabs */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
             <div className="flex border-b border-gray-200 dark:border-gray-700">
-              <button className="px-6 py-3 text-sm font-medium text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400">
+              <button 
+                onClick={() => router.push(`/admin/course/${courseId}`)}
+                className="px-6 py-3 text-sm font-medium text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
+              >
                 Materi
               </button>
-              <button className="px-6 py-3 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
-                Peserta
+              <button 
+                onClick={() => router.push(`/admin/course/${courseId}/student`)}
+                className="px-6 py-3 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+              >
+                Peserta & Pengumpulan
               </button>
             </div>
           </div>

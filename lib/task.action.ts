@@ -765,8 +765,8 @@ export async function updateSubmission(
     };
 
   } catch (error: any) {
-    console.error('❌ Update submission error:', error);
-    console.error('❌ Error message:', error.message);
+    console.error('Update submission error:', error);
+    console.error(' Error message:', error.message);
     return { success: false, error: 'Failed to update submission' };
   }
 }
@@ -808,3 +808,4 @@ export async function getTaskFileUrl(taskId: number) {
     return { success: false, error: 'Failed to get file' };
   }
 }
+

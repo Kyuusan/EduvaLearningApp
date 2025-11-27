@@ -148,7 +148,8 @@ export async function downloadFile(fileUrl: string, fileName: string): Promise<v
 /**
  * Get submission status badge color
  */
-export function getStatusBadgeColor(status: 'submitted' | 'late'): {
+
+export function getStatusBadgeColor(status: 'submitted' | 'late' | 'not_submitted'): {
   bg: string;
   text: string;
 } {
@@ -159,6 +160,11 @@ export function getStatusBadgeColor(status: 'submitted' | 'late'): {
         text: 'text-green-700 dark:text-green-300'
       };
     case 'late':
+      return {
+        bg: 'bg-orange-100 dark:bg-orange-900/30',
+        text: 'text-orange-700 dark:text-orange-300'
+      };
+    case 'not_submitted':
       return {
         bg: 'bg-red-100 dark:bg-red-900/30',
         text: 'text-red-700 dark:text-red-300'
@@ -171,20 +177,14 @@ export function getStatusBadgeColor(status: 'submitted' | 'late'): {
   }
 }
 
-/**
- * Convert datetime-local input value to MySQL datetime format
- */
 export function formatDateTimeForMySQL(dateTimeLocal: string): string {
-  // dateTimeLocal format: "2025-11-30T14:30"
   // MySQL format: "2025-11-30 14:30:00"
   return dateTimeLocal.replace('T', ' ') + ':00';
 }
 
-/**
- * Convert MySQL datetime to datetime-local input value
- */
+
 export function formatMySQLDateTimeForInput(mysqlDateTime: string): string {
   // MySQL format: "2025-11-30 14:30:00"
-  // datetime-local format: "2025-11-30T14:30"
   return mysqlDateTime.substring(0, 16).replace(' ', 'T');
 }
+

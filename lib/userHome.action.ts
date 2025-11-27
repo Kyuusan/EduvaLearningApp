@@ -26,6 +26,28 @@ interface TaskSummary {
   submissionStatus?: 'submitted' | 'late';
 }
 
+export interface Course {
+  id: number;
+  guruId: number | null;
+  adminId: number | null;
+  nama: string;
+  deskripsi: string;
+  kategori: "Umum" | "Kejuruan";
+  tingkat: "X" | "XI" | "XII";
+  imageUrl: string;
+  createdAt: Date;
+  enrolledKelas?: Array<{
+    kelasId: number;
+    kelasNama: string;
+  }>;
+}
+
+export interface CourseHistory extends Course {
+  kelasNama?: string;
+  lastAccessedAt: Date | string;
+  accessCount: number;
+}
+
 // ==================== GET DASHBOARD METRICS ====================
 export async function getDashboardMetrics() {
   try {
@@ -208,5 +230,141 @@ export async function getCompletedTasksSiswa() {
   } catch (error: any) {
     console.error('❌ Get completed tasks error:', error);
     return { success: false, error: 'Failed to get completed tasks' };
+  }
+}
+
+// ========================================
+// COURSE HISTORY TRACKING
+// ========================================
+
+
+export async function recordCourseAccess(courseId: number): Promise<void> {
+  const session = await getServerSession(authOptions);
+
+  if (!session || session.user.role !== "siswa") {
+    throw new Error("Only students can record course access");
+  }
+
+  try {
+    // 1. Ambil siswaId dari userId
+    const [siswaRows] = await db.query(
+      `SELECT id FROM siswa WHERE userId = ?`,
+      [session.user.id]
+    );
+    
+    const siswa = (siswaRows as any[])[0];
+    
+    if (!siswa) {
+      throw new Error("Student record not found");
+    }
+
+    // 2. Insert atau Update history
+
+    await db.query(`
+      INSERT INTO courseHistory (courseId, siswaId, lastAccessedAt, accessCount)
+      VALUES (?, ?, NOW(), 1)
+      ON DUPLICATE KEY UPDATE 
+        lastAccessedAt = NOW(),
+        accessCount = accessCount + 1
+    `, [courseId, siswa.id]);
+
+    console.log(`✓ Course access recorded: courseId=${courseId}, siswaId=${siswa.id}`);
+    
+  } catch (error) {
+    console.error("Error recording course access:", error);
+
+  }
+}
+
+
+export async function getCourseHistory(): Promise<Course[]> {
+  const session = await getServerSession(authOptions);
+
+  if (!session || session.user.role !== "siswa") {
+    throw new Error("Unauthorized");
+  }
+
+  try {
+    // 1. Ambil siswaId
+    const [siswaRows] = await db.query(
+      `SELECT id, kelasId FROM siswa WHERE userId = ?`,
+      [session.user.id]
+    );
+    
+    const siswa = (siswaRows as any[])[0];
+    
+    if (!siswa) {
+      return [];
+    }
+
+    // 2. Query course yang pernah dibuka, diurutkan dari yang terakhir dibuka
+    const query = `
+      SELECT DISTINCT
+        c.id, 
+        c.guruId, 
+        c.adminId, 
+        c.nama, 
+        c.deskripsi, 
+        c.kategori, 
+        c.tingkat, 
+        c.imageUrl, 
+        c.createdAt,
+        ch.lastAccessedAt,
+        ch.accessCount,
+        k.nama as kelasNama
+      FROM course c
+      INNER JOIN courseHistory ch ON c.id = ch.courseId
+      INNER JOIN course_kelas ck ON c.id = ck.courseId
+      INNER JOIN kelas k ON ck.kelasId = k.id
+      WHERE ch.siswaId = ? 
+        AND ck.kelasId = ?
+      ORDER BY ch.lastAccessedAt DESC
+      LIMIT 20
+    `;
+
+    const [rows] = await db.query(query, [siswa.id, siswa.kelasId]);
+    
+    console.log(`✓ Found ${(rows as any[]).length} courses in history`);
+    
+    return rows as Course[];
+    
+  } catch (error) {
+    console.error("Error fetching course history:", error);
+    throw new Error("Failed to fetch course history");
+  }
+}
+
+/**
+ * Get jumlah total course yang pernah diakses siswa
+ */
+export async function getTotalAccessedCourses(): Promise<number> {
+  const session = await getServerSession(authOptions);
+
+  if (!session || session.user.role !== "siswa") {
+    return 0;
+  }
+
+  try {
+    const [siswaRows] = await db.query(
+      `SELECT id FROM siswa WHERE userId = ?`,
+      [session.user.id]
+    );
+    
+    const siswa = (siswaRows as any[])[0];
+    
+    if (!siswa) {
+      return 0;
+    }
+
+    const [result] = await db.query(
+      `SELECT COUNT(*) as total FROM courseHistory WHERE siswaId = ?`,
+      [siswa.id]
+    );
+    
+    return (result as any)[0].total;
+    
+  } catch (error) {
+    console.error("Error getting total accessed courses:", error);
+    return 0;
   }
 }

@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import type { Course } from "../../../../lib/course.action";
 import { Loader2, AlertCircle, BookOpen, GraduationCap } from 'lucide-react';
 import { Poppins, Rubik } from 'next/font/google';
-import { useRouter } from "next/navigation"; // ✅ UBAH INI - dari next/navigation, bukan next/router
+import { useRouter } from "next/navigation"; 
 
 const poppins = Poppins({
   weight: ['400', '500', '600', '700'],
@@ -21,14 +21,14 @@ const rubik = Rubik({
 });
 
 export default function Course() {
-  const router = useRouter(); // ✅ Sekarang ini dari next/navigation
+  const router = useRouter();
   const { status } = useSession();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const handleCourseClick = (courseId: number) => {
-    router.push(`/user/course/${courseId}`); // ✅ Pastikan path lengkap sesuai role
+    router.push(`/user/course/${courseId}`); 
   };
 
   useEffect(() => {
@@ -149,7 +149,7 @@ export default function Course() {
               kelas={course.enrolledKelas?.map(k => k.kelasNama) || []}
               imageUrl={course.imageUrl}
               courseId={course.id}
-              onClick={() => handleCourseClick(course.id)} 
+              onClick={() => handleCourseClick(course.id)}
             />
           ))}
         </div>

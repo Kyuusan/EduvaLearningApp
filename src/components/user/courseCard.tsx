@@ -23,18 +23,39 @@ interface MapelCardProps {
   deskripsi?: string;
   imageUrl?: string;
   courseId: number;
-  onClick?: () => void; // ✅ Handler untuk click card
-  onEdit?: () => void;  // ✅ Optional untuk guru
-  onDelete?: () => void; // ✅ Optional untuk guru
+  onClick?: () => void; // 
+  onEdit?: () => void;  //
+  onDelete?: () => void; //
+}
+
+export interface Course {
+  id: number;
+  guruId: number | null;
+  adminId: number | null;
+  nama: string;
+  deskripsi: string;
+  kategori: "Umum" | "Kejuruan";
+  tingkat: "X" | "XI" | "XII";
+  imageUrl: string;
+  createdAt: Date;
+  enrolledKelas?: Array<{
+    kelasId: number;
+    kelasNama: string;
+  }>;
+}
+
+export interface CourseHistory extends Course {
+  kelasNama?: string;
+  lastAccessedAt: Date | string;
+  accessCount: number;
 }
 
 function MapelCard({ 
   namaMapel = "contoh", 
   kategori, 
-  kelas = ["XI RPL 1", "XI RPL 2", "XI RPL 3"], 
+  kelas = [" "],
   deskripsi = "Pelajari materi dan kerjakan tugas dengan baik ya woi pokoknya begitu dah",
   imageUrl = '/og.jpg',
-  courseId,
   onClick,
  
 }: MapelCardProps) {

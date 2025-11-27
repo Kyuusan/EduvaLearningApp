@@ -16,6 +16,8 @@ import {
   updateSubmission,
   getTaskFileUrl 
 } from '../../../../../lib/task.action';
+import { getCourseById } from '../../../../../lib/course.action';
+import { recordCourseAccess } from '../../../../../lib/userHome.action';
 import { toast } from 'react-hot-toast';
 import { AnimatePresence } from 'framer-motion';
 
@@ -76,6 +78,8 @@ export default function SiswaCourseDetailPage({ params }: { params: Promise<{ id
           document.removeEventListener('mousedown', handleClickOutside);
         };
       }, [showPopover]);
+
+      
     
       // Close on Escape key
       useEffect(() => {
@@ -99,17 +103,24 @@ export default function SiswaCourseDetailPage({ params }: { params: Promise<{ id
       const totalClasses = courseDetail?.enrolledClasses?.length || 0;
 
   useEffect(() => {
-    // ✅ Validasi courseId - SAMA SEPERTI ADMIN/GURU
+    // Validasi courseId ADMIN/GURU
     if (!courseId || isNaN(courseId)) {
       console.error('❌ Invalid courseId:', courseId);
       return;
     }
+     recordCourseAccess(courseId)
+      .then(() => {
+        console.log('Course access recorded for courseId:', courseId);
+      })
+      .catch(err => {
+        console.error('Failed to record course access:', err);
+      });
     
     loadData();
   }, [courseId]);
 
   const loadData = async () => {
-    console.group('🔍 SiswaCourseDetail - loadData');
+    console.group('SiswaCourseDetail - loadData');
     console.log('CourseId:', courseId);
     
     setLoading(true);
@@ -129,7 +140,7 @@ export default function SiswaCourseDetailPage({ params }: { params: Promise<{ id
         console.log('✅ Setting course detail:', detailRes.data);
         setCourseDetail(detailRes.data);
       } else {
-        console.error('❌ Detail failed:', detailRes.error);
+        console.error(' Detail failed:', detailRes.error);
         toast.error(detailRes.error || 'Gagal memuat course');
       }
 
@@ -137,15 +148,15 @@ export default function SiswaCourseDetailPage({ params }: { params: Promise<{ id
         console.log('✅ Setting tasks:', tasksRes.data?.length || 0, 'tasks');
         setTasks(tasksRes.data || []);
       } else {
-        console.error('❌ Tasks failed:', tasksRes.error);
+        console.error('Tasks failed:', tasksRes.error);
         toast.error(tasksRes.error || 'Gagal memuat tugas');
       }
     } catch (error) {
-      console.error('❌ loadData ERROR:', error);
+      console.error('loadData ERROR:', error);
       toast.error('Terjadi kesalahan saat memuat data');
     } finally {
       setLoading(false);
-      console.log('✅ loadData FINISHED');
+      console.log('loadData FINISHED');
       console.groupEnd();
     }
   };

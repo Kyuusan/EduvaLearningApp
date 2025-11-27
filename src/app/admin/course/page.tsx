@@ -110,10 +110,9 @@ export default function Course() {
     const response = await fetch('/api/course/guru');
     const data = await response.json();
 
-    console.log('📡 Raw API response:', data);
-    console.log('📊 Courses array:', data.data);
-    console.log('📝 Number of courses:', data.data?.length || 0);
-
+    console.log(' Raw API response:', data);
+    console.log(' Courses array:', data.data);
+    console.log(' Number of courses:', data.data?.length || 0);
     if (!response.ok) {
       throw new Error(data.error || 'Failed to fetch courses');
     }
@@ -464,7 +463,7 @@ const handleEdit = async (course: Course) => {
               Belum Ada Course
             </h3>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-              Klik tombol "Tambah Kursus" untuk membuat course pertama Anda
+              Klik tombol {""}Tambah Kursus{""} untuk membuat course pertama Anda
             </p>
           </div>
         )}
