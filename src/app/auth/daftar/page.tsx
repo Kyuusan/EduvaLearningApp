@@ -1,33 +1,108 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, FormEvent, ChangeEvent } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Users,  CircleChevronLeft } from 'lucide-react';
+import { Users, CircleChevronLeft, ChevronDown } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/user/dropdown';
+
+type Jurusan = 'RPL' | 'PSPT' | 'TJKT' | 'ANIM' | '';
+
+interface FormData {
+  nisn: string;
+  nama: string;
+  kelas: string;
+  email: string;
+}
+
+interface JurusanOption {
+  value: 'RPL' | 'PSPT' | 'TJKT' | 'ANIM';
+  label: string;
+}
 
 export default function Register() {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const router = useRouter();
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedJurusan, setSelectedJurusan] = useState<Jurusan>("");
+  
+  const [formData, setFormData] = useState<FormData>({
+    nisn: '',
+    nama: '',
+    kelas: '',
+    email: ''
+  });
 
+  const jurusanOptions: JurusanOption[] = [
+    { value: "RPL", label: "RPL" },
+    { value: "PSPT", label: "PSPT" },
+    { value: "TJKT", label: "TJKT" },
+    { value: "ANIM", label: "ANIM" }
+  ];
+
+  const handleJurusanSelect = (jurusan: 'RPL' | 'PSPT' | 'TJKT' | 'ANIM') => {
+    setSelectedJurusan(jurusan);
+  };
+
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    // Validasi
+    if (!formData.nisn || !formData.nama || !formData.kelas || !selectedJurusan || !formData.email) {
+      setError("Semua field harus diisi");
+      toast.error("Semua field harus diisi");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...formData,
+          jurusan: selectedJurusan
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Registrasi gagal');
+      }
+
+      toast.success(data.message);
+      
+      setTimeout(() => {
+        router.push('/auth/masuk');
+      }, 2000);
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Terjadi kesalahan';
+      console.error('Registration error:', error);
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div>
-      <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap');
-        
-        /* Hide number input arrows */
-        input[type="number"]::-webkit-inner-spin-button,
-        input[type="number"]::-webkit-outer-spin-button {
-          -webkit-appearance: none;
-          margin: 0;
-        }
-        input[type="number"] {
-          -moz-appearance: textfield;
-          appearance: textfield;
-        }
-      `}</style>
+    <div>  
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -36,13 +111,13 @@ export default function Register() {
         style={{ fontFamily: 'Poppins, sans-serif' }}
       >
         <Toaster position="top-center" reverseOrder={false} />
+        
         <motion.div 
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.7, delay: 0.2 }}
           className="relative m-0 flex max-w-screen-xl flex-1 justify-center bg-white shadow sm:m-6 sm:rounded-lg overflow-hidden"
         >
-
           {/* Back button (mobile & tablet only) */}
           <div className="absolute left-4 top-4 z-50 lg:hidden">
             <Link href="/">
@@ -88,7 +163,7 @@ export default function Register() {
                 transition={{ duration: 0.6, delay: 1 }}
                 className="w-full max-w-sm"
               >
-                {/* Error message with animation */}
+                {/* Error message */}
                 <AnimatePresence>
                   {error && (
                     <motion.div 
@@ -107,9 +182,10 @@ export default function Register() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.5, delay: 1.2 }}
+                  onSubmit={handleSubmit}
                 >
                   <div className="space-y-3">
-                    {/* Phone */}
+                    {/* NISN */}
                     <motion.div
                       initial={{ x: -20, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
@@ -120,11 +196,15 @@ export default function Register() {
                         transition={{ duration: 0.2 }}
                         className="w-full rounded-lg border border-blue-200 bg-white px-5 py-3 text-sm font-medium placeholder-gray-500 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100"
                         type="number"
+                        name="nisn"
+                        value={formData.nisn}
+                        onChange={handleInputChange}
                         placeholder="NISN"
+                        maxLength={9}
                       />
                     </motion.div>
 
-                    {/* Email */}
+                    {/* Nama Lengkap */}
                     <motion.div
                       initial={{ x: -20, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
@@ -135,10 +215,14 @@ export default function Register() {
                         transition={{ duration: 0.2 }}
                         className="w-full rounded-lg border border-blue-200 bg-white px-5 py-3 text-sm font-medium placeholder-gray-500 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100"
                         type="text"
+                        name="nama"
+                        value={formData.nama}
+                        onChange={handleInputChange}
                         placeholder="Nama Lengkap"
                       />
                     </motion.div>
 
+                    {/* Kelas */}
                     <motion.div
                       initial={{ x: -20, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
@@ -149,28 +233,71 @@ export default function Register() {
                         transition={{ duration: 0.2 }}
                         className="w-full rounded-lg border border-blue-200 bg-white px-5 py-3 text-sm font-medium placeholder-gray-500 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100"
                         type="text"
+                        name="kelas"
+                        value={formData.kelas}
+                        onChange={handleInputChange}
                         placeholder="Kelas"
                       />
                     </motion.div>
+
+                    {/* Jurusan Dropdown */}
                     <motion.div
                       initial={{ x: -20, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
-                      transition={{ duration: 0.5, delay: 1.6 }}
+                      transition={{ duration: 0.5, delay: 1.65 }}
                     >
-                      <motion.input
-                        whileFocus={{ scale: 1.02, borderColor: "#60a5fa" }}
-                        transition={{ duration: 0.2 }}
-                        className="w-full rounded-lg border border-blue-200 bg-white px-5 py-3 text-sm font-medium placeholder-gray-500 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100"
-                        type="text"
-                        placeholder="Email"
-                      />
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <motion.button
+                            type="button"
+                            whileFocus={{ scale: 1.02, borderColor: "#60a5fa" }}
+                            transition={{ duration: 0.2 }}
+                            className="w-full rounded-lg border border-blue-200 bg-white px-5 py-3 text-sm font-medium text-left focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100 flex justify-between items-center"
+                          >
+                            <span className={selectedJurusan ? "text-gray-900" : "text-gray-500"}>
+                              {selectedJurusan || "Jurusan"}
+                            </span>
+                            <ChevronDown size={16} className="text-gray-500" />
+                          </motion.button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="bg-white">
+                          {jurusanOptions.map((option) => (
+                            <motion.div
+                              key={option.value}
+                              whileHover={{ backgroundColor: "#f3f4f6" }}
+                              className="px-4 py-2.5 text-sm cursor-pointer transition-colors rounded-md"
+                              onClick={() => handleJurusanSelect(option.value)}
+                            >
+                              {option.label}
+                            </motion.div>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </motion.div>
 
-                    {/* Password */}
+                    {/* Email */}
                     <motion.div
                       initial={{ x: -20, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
                       transition={{ duration: 0.5, delay: 1.7 }}
+                    >
+                      <motion.input
+                        whileFocus={{ scale: 1.02, borderColor: "#60a5fa" }}
+                        transition={{ duration: 0.2 }}
+                        className="w-full rounded-lg border border-blue-200 bg-white px-5 py-3 text-sm font-medium placeholder-gray-500 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100"
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        placeholder="Email"
+                      />
+                    </motion.div>
+
+                    {/* Password Info */}
+                    <motion.div
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ duration: 0.5, delay: 1.8 }}
                       className="relative"
                     >
                       <motion.input
@@ -182,8 +309,6 @@ export default function Register() {
                         readOnly
                       />
                     </motion.div>
-
-                   
                   </div>
 
                   <motion.div 
@@ -356,13 +481,7 @@ export default function Register() {
                   style={{ fontFamily: 'Rubik, sans-serif' }}
                 >
                   Selamat Datang di{' '}
-                  <motion.span 
-                    
-                  
-                  className='text-blue-400'
-                  >
-                    Eduva
-                  </motion.span>
+                  <span className='text-blue-400'>Eduva</span>
                 </motion.h2>
 
                 <motion.p 

@@ -1,87 +1,80 @@
 "use client";
-import React, { useEffect, useRef, useState,useCallback } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../../context/SidebarContext";
 import {House, CalendarFold, Blocks, Bot, CircleUserRound, ChevronDownIcon, SquareKanban} from "lucide-react"
 import { HorizontaLDots } from "@/icons";
+import { useSession } from "next-auth/react";
+
 
 type NavItem = {
   name: string;
   icon: React.ReactNode;
   path?: string;
   subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
+  guruAccses: boolean;
 };
 
 const navItems: NavItem[] = [
   {
     icon: <House />,
     name: "Beranda",
-    path: "/admin"
+    path: "/admin",
+    guruAccses: true
   },
   {
     icon: <Blocks />,
     name: "Kursus",
-    path: "/admin/course"
+    path: "/admin/course",
+    guruAccses: true
   },
   {
     icon: <CalendarFold />,
     name: "Kalender",
-    path: "/admin/calendar"
+    path: "/admin/calendar",
+    guruAccses: true
   },
   {
     icon: <Bot />,
     name: "Chatbot",
-    path: "/admin/chatbot"
+    path: "/admin/chatbot",
+    guruAccses: true
   },
   {
     icon: <SquareKanban />,
     name: "Managemen Pengguna",
-    path: "/admin/manage"
+    path: "/admin/manage",
+    guruAccses: false
   },
   {
     icon: <CircleUserRound />,
     name: "Profile",
-    path: "/admin/profile"
+    path: "/admin/profile",
+    guruAccses: true
   },
-
 ];
 
-// const othersItems: NavItem[] = [
-//   {
-//     icon: <PieChartIcon />,
-//     name: "Charts",
-//     subItems: [
-//       { name: "Line Chart", path: "/admin/line-chart", pro: false },
-//       { name: "Bar Chart", path: "/admin/bar-chart", pro: false },
-//     ],
-//   },
-//   {
-//     icon: <BoxCubeIcon />,
-//     name: "UI Elements",
-//     subItems: [
-//       { name: "Alerts", path: "/admin/alerts", pro: false },
-//       { name: "Avatar", path: "/admin/avatars", pro: false },
-//       { name: "Badge", path: "/admin/badge", pro: false },
-//       { name: "Buttons", path: "/admin/buttons", pro: false },
-//       { name: "Images", path: "/admin/images", pro: false },
-//       { name: "Videos", path: "/admin/videos", pro: false },
-//     ],
-//   },
-//   {
-//     icon: <PlugInIcon />,
-//     name: "Authentication",
-//     subItems: [
-//       { name: "Sign In", path: "/signin", pro: false },
-//       { name: "Sign Up", path: "/signup", pro: false },
-//     ],
-//   },
-// ];
+
 
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
+  const { data: session } = useSession();
   const pathname = usePathname();
+
+  // Filter navItems berdasarkan role user
+  const filteredNavItems = useCallback(() => {
+    const userRole = session?.user?.role;
+    
+    // Jika user adalah guru, filter menu yang guruAccses: false
+    if (userRole === "guru") {
+      return navItems.filter(item => item.guruAccses === true);
+    }
+    
+    // Jika bukan guru (admin/siswa), tampilkan semua menu
+    return navItems;
+  }, [session?.user?.role]);
 
   const renderMenuItems = (
     navItems: NavItem[],
@@ -218,34 +211,7 @@ const AppSidebar: React.FC = () => {
   );
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  // const isActive = (path: string) => path === pathname;
-   const isActive = useCallback((path: string) => path === pathname, [pathname]);
-
-  // useEffect(() => {
-  //   // Check if the current path matches any submenu item
-  //   let submenuMatched = false;
-  //   ["main", "others"].forEach((menuType) => {
-  //     const items = menuType === "main" ? navItems : othersItems;
-  //     items.forEach((nav, index) => {
-  //       if (nav.subItems) {
-  //         nav.subItems.forEach((subItem) => {
-  //           if (isActive(subItem.path)) {
-  //             setOpenSubmenu({
-  //               type: menuType as "main" | "others",
-  //               index,
-  //             });
-  //             submenuMatched = true;
-  //           }
-  //         });
-  //       }
-  //     });
-  //   });
-
-  //   // If no submenu item matches, close the open submenu
-  //   if (!submenuMatched) {
-  //     setOpenSubmenu(null);
-  //   }
-  // }, [pathname,isActive]);
+  const isActive = useCallback((path: string) => path === pathname, [pathname]);
 
   useEffect(() => {
     // Set the height of the submenu items when the submenu is opened
@@ -338,7 +304,8 @@ const AppSidebar: React.FC = () => {
                   <HorizontaLDots />
                 )}
               </h2>
-              {renderMenuItems(navItems, "main")}
+              {/* Render filtered navItems berdasarkan role */}
+              {renderMenuItems(filteredNavItems(), "main")}
             </div>
 
             <div className="">

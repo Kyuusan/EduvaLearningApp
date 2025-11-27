@@ -1,75 +1,102 @@
 'use client';
 import { CircleChevronLeft, Leaf, Eye, EyeOff } from "lucide-react";
-import React, { useState } from 'react';
+import React, { useState, FormEvent, ChangeEvent } from 'react';
+import { signIn, useSession } from "next-auth/react"
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import toast, { Toaster } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [showPassword, setShowPassword] = useState(false);
-  const router = useRouter();
+interface LoginFormData {
+  email: string;
+  password: string;
+}
 
-  const handleLogin = async (e) => {
+export default function Login() {
+  const router = useRouter();
+  const { data: session } = useSession();
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  
+  const [formData, setFormData] = useState<LoginFormData>({
+    email: '',
+    password: ''
+  });
+
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
+    setLoading(true);
+
+    // Validasi
+    if (!formData.email || !formData.password) {
+      setError("email dan password harus di isi")
+      toast.error("Email dan password harus diisi");
+      setLoading(false);
+      return;
+    }
 
     try {
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      console.log("Attempting login...");
+      
+      const result = await signIn('credentials', {
+        redirect: false,
+        email: formData.email,
+        password: formData.password,
       });
 
-      if (authError) {
-        setError(authError.message);
-        toast.error('Login gagal: ' + authError.message);
-        setLoading(false);
-        return;
+      console.log(" SignIn result:", result);
+
+      if (result?.error) {
+        throw new Error(result.error);
       }
 
-      const userId = authData.user.id;
-      const accessToken = authData.session.access_token;
-      const refreshToken = authData.session.refresh_token;
-
-      localStorage.setItem('supabase_access_token', accessToken);
-      localStorage.setItem('supabase_refresh_token', refreshToken);
-      localStorage.setItem('user_id', userId);
-
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('role, active_token')
-        .eq('id', userId)
-        .single();
-
-      if (profileError) {
-        toast.error('Profil tidak ditemukan. Hubungi admin.');
-        setLoading(false);
-        return;
+      if (!result?.ok) {
+        throw new Error(result?.error || "Login gagal");
       }
 
-      const userRole = profileData.role;
-      localStorage.setItem('user_role', userRole);
-      localStorage.setItem('user_email', email);
+      toast.success('Login berhasil!');
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-      setLoading(false);
+      const currentSession = await fetch('/api/auth/session').then(res => res.json());
+      
+      console.log(" Current session:", currentSession);
+      console.log(" User role:", currentSession?.user?.role);
 
-      if (userRole === 'admin') {
-        toast.success('Login berhasil! Selamat datang, Admin!');
-        router.push('/admin/default');
+      const userRole = currentSession?.user?.role;
+
+      if (userRole === 'siswa') {
+        console.log(" Redirecting to /user (siswa)");
+        router.push('/user');
+      } else if (userRole === 'admin') {
+        console.log(" Redirecting to /admin (admin)");
+        router.push('/admin');
+      } else if (userRole === 'guru') {
+        console.log(" Redirecting to /admin (guru)");
+        router.push('/admin');
       } else {
-        toast.success('Login berhasil! Selamat datang!');
-        router.push('/user/home');
+        console.log(" Unknown role, defaulting to /user");
+        router.push('/user');
       }
 
+      router.refresh();
+      
     } catch (error) {
-      console.error('Unexpected error:', error);
-      toast.error('Terjadi kesalahan tidak terduga.');
+      const errorMessage = error instanceof Error ? error.message : 'Terjadi kesalahan saat login';
+      console.error('Login error:', error);
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
       setLoading(false);
     }
   };
@@ -296,75 +323,51 @@ export default function Login() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.5, delay: 1.4 }}
-                  onSubmit={handleLogin}
+                  onSubmit={handleSubmit}
                 >
-                  <div className="space-y-4">
+                   <div className="space-y-3">
+                    {/* Email */}
                     <motion.div
                       initial={{ x: -20, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
-                      transition={{ duration: 0.5, delay: 1.5 }}
+                      transition={{ duration: 0.5, delay: 1.4 }}
                     >
                       <motion.input
                         whileFocus={{ scale: 1.02, borderColor: "#60a5fa" }}
                         transition={{ duration: 0.2 }}
-                        className="w-full rounded-lg border border-blue-200 bg-white px-5 py-3 text-sm placeholder-gray-500 focus:border-blue-400 focus:ring-4 focus:ring-blue-100 focus:outline-none"
+                        className="w-full rounded-lg border border-blue-200 bg-white px-5 py-3 text-sm font-medium placeholder-gray-500 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100"
                         type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
                         placeholder="Email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
                       />
                     </motion.div>
 
+                    {/* Password */}
                     <motion.div
                       initial={{ x: -20, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
-                      transition={{ duration: 0.5, delay: 1.6 }}
+                      transition={{ duration: 0.5, delay: 1.5 }}
                       className="relative"
                     >
                       <motion.input
                         whileFocus={{ scale: 1.02, borderColor: "#60a5fa" }}
                         transition={{ duration: 0.2 }}
-                        className="w-full rounded-lg border border-blue-200 bg-white px-5 py-3 text-sm placeholder-gray-500 focus:border-blue-400 focus:ring-4 focus:ring-blue-100 focus:outline-none pr-12"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Kata Sandi"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
+                        className="w-full rounded-lg border border-blue-200 bg-white px-5 py-3 text-sm font-medium placeholder-gray-500 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100 pr-12"
+                        type={showPassword ? 'text' : 'password'}
+                        name="password"
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        placeholder="Password"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-800 transition-colors"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
                       >
-                        {showPassword ? (
-                          <EyeOff size={20} />
-                        ) : (
-                          <Eye size={20} />
-                        )}
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>
-                    </motion.div>
-
-                    <motion.div 
-                      initial={{ y: 10, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ duration: 0.5, delay: 1.7 }}
-                      className="flex items-center justify-between text-sm"
-                    >
-                      <motion.label 
-                        whileHover={{ scale: 1.02 }}
-                        className="flex items-center cursor-pointer"
-                      >
-                        <input type="checkbox" className="mr-2 text-blue-600 focus:ring-blue-500" />
-                        <span className="text-gray-600">Ingat saya</span>
-                      </motion.label>
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                      >
-                        <Link href="/auth/lupa-password" className="font-medium text-blue-800 hover:text-blue-900 transition-colors duration-200">
-                          Lupa kata sandi?
-                        </Link>
-                      </motion.div>
                     </motion.div>
                   </div>
 
@@ -443,7 +446,7 @@ export default function Login() {
                   >
                     Kebijakan Privasi
                   </motion.a>{' '}
-                  Harita
+                 Eduva
                 </motion.p>
               </motion.div>
             </motion.div>

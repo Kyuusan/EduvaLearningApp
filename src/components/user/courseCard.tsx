@@ -1,6 +1,8 @@
+"use client"
+
 import React from 'react';
 import Image from 'next/image';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight} from 'lucide-react';
 import { Poppins, Rubik } from 'next/font/google';
 
 const poppins = Poppins({
@@ -20,7 +22,10 @@ interface MapelCardProps {
   kelas: string[];  
   deskripsi?: string;
   imageUrl?: string;
-  link?: string;
+  courseId: number;
+  onClick?: () => void; // ✅ Handler untuk click card
+  onEdit?: () => void;  // ✅ Optional untuk guru
+  onDelete?: () => void; // ✅ Optional untuk guru
 }
 
 function MapelCard({ 
@@ -29,7 +34,9 @@ function MapelCard({
   kelas = ["XI RPL 1", "XI RPL 2", "XI RPL 3"], 
   deskripsi = "Pelajari materi dan kerjakan tugas dengan baik ya woi pokoknya begitu dah",
   imageUrl = '/og.jpg',
-  link = '#'
+  courseId,
+  onClick,
+ 
 }: MapelCardProps) {
   
   const kategoriColor = kategori === 'umum' 
@@ -46,7 +53,10 @@ function MapelCard({
     : `${kelas.slice(0, 2).join(', ')} +${kelas.length - 2}`;
 
   return (
-    <div className='w-full max-w-[400px] h-[420px] group mx-auto dark:bg-[#252525] p-2 bg-white dark:border-0 border overflow-hidden rounded-md dark:text-white text-black'>
+    <div 
+      onClick={onClick} // ✅ Handle click untuk navigate
+      className={`w-full max-w-[400px] h-[420px] group mx-auto dark:bg-[#252525] p-2 bg-white dark:border-0 border overflow-hidden rounded-md dark:text-white text-black ${onClick ? 'cursor-pointer' : ''}`}
+    >
       <figure className='w-full h-60 group-hover:h-52 transition-all duration-300 dark:bg-[#0a121a] bg-[#f0f5fa] p-2 rounded-md relative overflow-hidden'>
         <div
           style={{
@@ -71,8 +81,8 @@ function MapelCard({
           
           {/* Tooltip untuk menampilkan semua kelas saat hover */}
           {kelas.length > 2 && (
-            <div className={`absolute top-full left-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl p-3 opacity-0 invisible group-hover/badge:opacity-100 group-hover/badge:visible transition-all duration-200 z-10 ${poppins.className}`}>
-              <p className='text-xs font-semibold mb-2 text-gray-700 dark:text-gray-300'>Semua Kelas:</p>
+            <div className={`absolute top-full left-0 mt-2 w-52 max-h-64 overflow-y-auto z-50 bg-white dark:bg-gray-800 rounded-lg shadow-xl p-3 opacity-0 invisible group-hover/badge:opacity-100 group-hover/badge:visible transition-all duration-200 ${poppins.className}`}>
+              <p className='text-xs font-semibold mb-2 text-gray-700 dark:text-gray-300 sticky top-0 bg-white dark:bg-gray-800 pb-1'>Semua Kelas:</p>
               <div className='flex flex-wrap gap-1.5'>
                 {kelas.map((kelasItem, index) => (
                   <span 
@@ -100,24 +110,28 @@ function MapelCard({
         </h1>
         
         {/* Deskripsi */}
-        <p className='text-sm  text-gray-600 dark:text-gray-400 leading-snug'>
+        <p className='text-sm text-gray-600 dark:text-gray-400 leading-snug line-clamp-2'>
           {deskripsi}
         </p>
         
-        {/* Link */}
-        <a
-          href={link}
-          className='text-base dark:text-white text-blue-600 font-normal group-hover:opacity-100 opacity-0 translate-y-2 group-hover:translate-y-0 pt-2 flex gap-1 transition-all duration-300'
+        {/* Link Button - Hanya muncul saat hover */}
+        <button
+          onClick={(e) => {
+            if (onClick) {
+              e.stopPropagation(); // Prevent double trigger
+              onClick();
+            }
+          }}
+          className='text-base dark:text-white text-blue-600 font-normal group-hover:opacity-100 opacity-0 translate-y-2 group-hover:translate-y-0 pt-2 flex gap-1 transition-all duration-300 hover:text-blue-700 dark:hover:text-blue-300'
         >
           Lihat Materi
           <span>
             <ChevronRight />
           </span>
-        </a>
+        </button>
       </article>
     </div>
   );
 }
 
 export default MapelCard;
-
